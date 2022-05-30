@@ -58,7 +58,11 @@ class MainView extends HookWidget {
                               station.value = null;
                             }, (Bus b, Timetable timetable) async {
                               await ApiService.I.updateLocation(b, timetable);
-                              bus.value = b;
+                              bus.value = Bus();
+                              bus.value?.linia = b.linia;
+                              bus.value?.szer_geo = b.szer_geo;
+                              bus.value?.dlug_geo = b.dlug_geo;
+
                               if (b.dlug_geo != null && b.szer_geo != null) {
                                 LatLng latlan = LatLng((bus.value!.szer_geo!),
                                     (bus.value!.dlug_geo!));

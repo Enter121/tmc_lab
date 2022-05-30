@@ -46,7 +46,8 @@ class MapWidget extends HookWidget {
         builder: (ctx) => Container(
           child: const Icon(
             Icons.directions_bus,
-            color: Colors.amberAccent,
+            color: Colors.purpleAccent,
+            size: 40,
           ),
         ),
       ));
