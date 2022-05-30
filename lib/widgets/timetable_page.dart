@@ -17,20 +17,19 @@ class _TimetablePage extends State<TimetablePage> {
     List<SizedBox> list = [];
 
     for (Timetable time in times) {
-      if (compareTime(time.czas, widget.dateTime)) {
-        list.add(SizedBox(
-          width: 200,
-          height: 40,
-          child: TextButton(
-            child: Text(
-              '${time.czas}',
-              style: const TextStyle(fontSize: 25, color: Colors.black),
-            ),
-            onPressed: () async {
-            },
+      //  if (compareTime(time.czas, widget.dateTime)) {
+      list.add(SizedBox(
+        width: 200,
+        height: 40,
+        child: TextButton(
+          child: Text(
+            '${time.czas}',
+            style: const TextStyle(fontSize: 25, color: Colors.black),
           ),
-        ));
-      }
+          onPressed: () async {},
+        ),
+      ));
+      // }
     }
 
     return list;
@@ -40,55 +39,55 @@ class _TimetablePage extends State<TimetablePage> {
   Widget build(BuildContext context) {
     return Container(
         child: Column(
-          children: [
-            Flexible(
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: Colors.blue,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: const Icon(
-                          Icons.arrow_back_rounded,
-                          size: 50,
-                          color: Colors.white,
-                        ),
-                      ),
-                      alignment: Alignment.centerLeft,
-                    ),
-                    Material(
-                      child: Text(
-                        '${widget.info.nazwa_zespolu.toString().toUpperCase()} ${widget.info.slupek}: LINE '
-                            '${widget.bus}',
-                        style: const TextStyle(
-                          fontSize: 35,
-                          color: Colors.white,
-                        ),
-                      ),
-                      color: Colors.transparent,
-                    ),
-                    Container()
-                  ],
-                ),
-              ),
-              flex: 1,
+      children: [
+        Flexible(
+          child: Container(
+            decoration: const BoxDecoration(
+              color: Colors.blue,
             ),
-            Flexible(
-              child: Wrap(
-                alignment: WrapAlignment.spaceAround,
-                direction: Axis.vertical,
-                children: _getTime(widget.times),
-              ),
-              flex: 8,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Icon(
+                      Icons.arrow_back_rounded,
+                      size: 50,
+                      color: Colors.white,
+                    ),
+                  ),
+                  alignment: Alignment.centerLeft,
+                ),
+                Material(
+                  child: Text(
+                    '${widget.info.nazwa_zespolu.toString().toUpperCase()} ${widget.info.slupek}: LINE '
+                    '${widget.bus}',
+                    style: const TextStyle(
+                      fontSize: 35,
+                      color: Colors.white,
+                    ),
+                  ),
+                  color: Colors.transparent,
+                ),
+                Container()
+              ],
             ),
-          ],
-        ));
+          ),
+          flex: 1,
+        ),
+        Flexible(
+          child: Wrap(
+            alignment: WrapAlignment.spaceAround,
+            direction: Axis.vertical,
+            children: _getTime(widget.times),
+          ),
+          flex: 8,
+        ),
+      ],
+    ));
   }
 }
 
@@ -96,10 +95,6 @@ bool compareTime(var time1, DateTime time2) {
   int hour1 = int.parse(time1.toString().substring(0, 2));
   int minutes1 = int.parse(time1.toString().substring(3, 5));
 
-  bool ret = ((hour1 >= time2.hour && minutes1 >= time2.minute) ||
-          (hour1 > time2.hour))
-      ? true
-      : false;
-
-  return ret;
+  return ((hour1 >= time2.hour && minutes1 >= time2.minute) ||
+      (hour1 > time2.hour));
 }

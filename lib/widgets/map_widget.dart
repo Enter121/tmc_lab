@@ -1,24 +1,16 @@
-import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:tmc_lab/models/bus.dart';
 import 'package:tmc_lab/models/station.dart';
-import 'package:tmc_lab/models/time_table.dart';
-
-import 'package:tmc_lab/services/api_service.dart';
-import 'package:tmc_lab/widgets/buses_page.dart';
 
 class MapWidget extends HookWidget {
   List<dynamic> stations;
   MapController controller;
-
-  MapWidget(this.stations, this.controller);
-
+  Function(Station station)? select;
+  MapWidget(this.stations, this.controller, this.select);
 
   @override
   Widget build(BuildContext context) {
@@ -31,16 +23,15 @@ class MapWidget extends HookWidget {
           point: LatLng(
               double.parse(value.szer_geo), double.parse(value.dlug_geo)),
           builder: (ctx) => Container(
-            child:  const Icon(
-                Icons.location_on_sharp,
-                color: Colors.red,
-              ),
+            child: const Icon(
+              Icons.location_on_sharp,
+              color: Colors.red,
+            ),
           ),
         ));
       }
       return markers;
     }, [stations.length]);
-
     return FlutterMap(
       mapController: controller,
       options: MapOptions(
@@ -59,16 +50,16 @@ class MapWidget extends HookWidget {
         MarkerClusterLayerOptions(
           onMarkerTap: (marker) async {
             controller.move(marker.point, 18.0);
-           var value =  stations.firstWhere((element){
-              return LatLng(
-                  double.parse(element.szer_geo), double.parse(element.dlug_geo)).toString()==marker.point.toString();
+            var value = stations.firstWhere((element) {
+              return LatLng(double.parse(element.szer_geo),
+                          double.parse(element.dlug_geo))
+                      .toString() ==
+                  marker.point.toString();
             });
-              List buses = await ApiService.I.getBuses(
-                  value.id_ulicy, value.slupek);
-              Navigator.of(context).push(MaterialPageRoute(builder: (context) =>
-                  BusesPage(value.id_ulicy, value.slupek, buses, value)));
-
-
+            if (select != null) select!(value);
+            // Navigator.of(context).push(MaterialPageRoute(
+            //     builder: (context) =>
+            //         BusesPage(value.zespol, value.slupek, buses, value)));
           },
           maxClusterRadius: 120,
           size: Size(40, 40),
@@ -91,5 +82,3 @@ class MapWidget extends HookWidget {
     );
   }
 }
-
-

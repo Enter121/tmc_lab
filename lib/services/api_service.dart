@@ -24,7 +24,7 @@ class ApiService {
       return cache!;
     }
     var response = await invoke(
-        "https://api.um.warszawa.pl/api/action/dbstore_get/?id=ab75c33d-3a26-4342-b36a-6e5fef0a3ac3&apikey=" +
+        "https://api.um.warszawa.pl/api/action/dbstore_get/?id=1c08a38c-ae09-46d2-8926-4f9d25cb0630&apikey=" +
             apiKey);
 
     List<Station> stations = [];
@@ -40,7 +40,6 @@ class ApiService {
           tmpRow.length, (i) => json.decode(jsonEncode(tmpRow[i])));
 
       Station station = Station();
-
       station.dlug_geo = getValue(entry, "dlug_geo");
       station.id_ulicy = getValue(entry, "id_ulicy");
       station.kierunek = getValue(entry, "kierunek");
@@ -55,15 +54,17 @@ class ApiService {
     return stations;
   }
 
-
   Future<List<Bus>> getBuses(var Id, var Nr) async {
-
+    print("aa " + Id + " " + Nr);
     var response = await invoke(
-        "https://api.um.warszawa.pl/api/action/dbtimetable_get/?id=88cd555f-6f31-43ca-9de4-66c479ad5942&busstopId="+Id+"&busstopNr="+Nr+"&apikey=" +
+        "https://api.um.warszawa.pl/api/action/dbtimetable_get/?id=88cd555f-6f31-43ca-9de4-66c479ad5942&busstopId=" +
+            Id +
+            "&busstopNr=" +
+            Nr +
+            "&apikey=" +
             apiKey);
 
     List<Bus> buses = [];
-
     final Map<String, dynamic> data = json.decode(response.body);
     final List<dynamic> tmp = json.decode(jsonEncode(data.values.first));
     for (var value in tmp) {
@@ -76,7 +77,7 @@ class ApiService {
 
       Bus bus = Bus();
 
-      bus.linia=getValue(entry, "linia");
+      bus.linia = getValue(entry, "linia");
       buses.add(bus);
       //print(bus.lina);
 
@@ -85,12 +86,16 @@ class ApiService {
     return buses;
   }
 
-
-
   Future<List<Timetable>> getTimetable(var Id, var Nr, var bus) async {
-
+    print(Id + " " + Nr + " " + bus);
     var response = await invoke(
-        "https://api.um.warszawa.pl/api/action/dbtimetable_get/?id=e923fa0e-d96c-43f9-ae6e-60518c9f3238&busstopId="+Id+"&busstopNr="+Nr+"&line="+bus+"&apikey="+
+        "https://api.um.warszawa.pl/api/action/dbtimetable_get/?id=e923fa0e-d96c-43f9-ae6e-60518c9f3238&busstopId=" +
+            Id +
+            "&busstopNr=" +
+            Nr +
+            "&line=" +
+            bus +
+            "&apikey=" +
             apiKey);
 
     List<Timetable> timetables = [];
@@ -107,19 +112,13 @@ class ApiService {
 
       Timetable timetable = Timetable();
 
-      timetable.czas=getValue(entry, "czas");
+      timetable.czas = getValue(entry, "czas");
       timetable.kierunek = getValue(entry, "kierunek");
-      timetable.brygada =getValue(entry, "brygada");
-      timetable.trasa=getValue(entry, "trasa");
+      timetable.brygada = getValue(entry, "brygada");
+      timetable.trasa = getValue(entry, "trasa");
       timetables.add(timetable);
-
-
     }
 
     return timetables;
   }
-
-
-
-
 }

@@ -1,17 +1,18 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:blinking_text/blinking_text.dart';
 import 'package:flutter/material.dart';
 import 'package:tmc_lab/models/bus.dart';
 import 'package:tmc_lab/models/time_table.dart';
 import 'package:tmc_lab/services/api_service.dart';
-
 import 'package:tmc_lab/widgets/timetable_page.dart';
 
 class BusesPage extends StatefulWidget {
   var busstopId, busstopNr;
   var buses;
   var info;
+  Function()? close;
 
-  BusesPage(this.busstopId, this.busstopNr, this.buses, this.info);
+  BusesPage(this.busstopId, this.busstopNr, this.buses, this.info, this.close);
 
   @override
   State<StatefulWidget> createState() => _BusesPage();
@@ -32,15 +33,16 @@ class _BusesPage extends State<BusesPage> {
               return Text('${snapshot.error}');
             } else if (snapshot.hasData) {
               return TextButton(
-                child: BlinkText('${bus.linia} - next bus in: ${timeToNextBus(bus, snapshot.data)}',
-                  style: TextStyle(
-                    fontSize: 35,
-                    color: timeColor(timeToNextBus(bus, snapshot.data))
-                        ? Colors.red
-                        : Colors.black,
-                  ),
-                endColor: Colors.black,
-                    duration: Duration(milliseconds: 500 )),
+                child: BlinkText(
+                    '${bus.linia} - ${timeToNextBus(bus, snapshot.data)}',
+                    style: TextStyle(
+                      fontSize: 35,
+                      color: timeColor(timeToNextBus(bus, snapshot.data))
+                          ? Colors.red
+                          : Colors.black,
+                    ),
+                    endColor: Colors.black,
+                    duration: Duration(milliseconds: 500)),
                 onPressed: () async {
                   List timetables = await ApiService.I.getTimetable(
                       widget.busstopId, widget.busstopNr, bus.linia);
@@ -72,63 +74,63 @@ class _BusesPage extends State<BusesPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Flexible(
-          child: Container(
-            color: Colors.blue,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: const Icon(
-                      Icons.clear,
-                      size: 50,
-                      color: Colors.white,
+    return Container(
+      color: Colors.white,
+      child: Column(
+        children: [
+          Flexible(
+            child: Container(
+              color: Colors.blue,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Container(
+                    child: TextButton(
+                      onPressed: () {
+                        //Navigator.pop(context);
+                        if (widget.close != null) widget.close!();
+                      },
+                      child: const Icon(
+                        Icons.clear,
+                        size: 50,
+                        color: Colors.white,
+                      ),
                     ),
+                    alignment: Alignment.centerLeft,
                   ),
-                  alignment: Alignment.centerLeft,
-                ),
-                Material(
-                  child: Text(
+                  AutoSizeText(
                     '${widget.info.nazwa_zespolu.toString().toUpperCase()} ${widget.info.slupek}',
-                    style: const TextStyle(
-                      fontSize: 35,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
                       color: Colors.white,
                     ),
-                  ),
-                  color: Colors.transparent,
-                ),
-                Container()
-              ],
+                  )
+                ],
+              ),
             ),
+            flex: 2,
           ),
-          flex: 1,
-        ),
-        Flexible(
-          child: SizedBox(
-            width: MediaQuery.of(context).size.width,
-            child: _getBuses(widget.busstopId, widget.busstopNr, widget.buses),
+          Flexible(
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width,
+              child: SingleChildScrollView(
+                  child: _getBuses(
+                      widget.busstopId, widget.busstopNr, widget.buses)),
+            ),
+            flex: 9,
           ),
-          flex: 9,
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
+
 String timeToNextBus(Bus bus, var timetables) {
-  String string = 'Not available';
+  String string = '===';
 
   for (Timetable time in timetables) {
     if (compareTime(time.czas, DateTime.now())) {
-      print(bus.linia);
-
       string = timeCalc(time.czas);
-      print(string);
       break;
     }
   }
@@ -159,7 +161,7 @@ String timeCalc(var time) {
 }
 
 bool timeColor(String time) {
-  if (time == 'Not available') {
+  if (time == '===') {
     return false;
   }
 

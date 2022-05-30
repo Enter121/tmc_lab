@@ -33,6 +33,7 @@ dependencies:
   flutter_hooks: ^0.18.3
   flutter_map_marker_cluster: ^0.4.4
   search_page: ^2.0.0+1
+  auto_size_text: ^3.0.0
   flutter:
     sdk: flutter
 
