@@ -17,7 +17,7 @@ class _TimetablePage extends State<TimetablePage> {
     List<SizedBox> list = [];
 
     for (Timetable time in times) {
-      //  if (compareTime(time.czas, widget.dateTime)) {
+       if (compareTime(time.czas, widget.dateTime)) {
       list.add(SizedBox(
         width: 200,
         height: 40,
@@ -29,7 +29,7 @@ class _TimetablePage extends State<TimetablePage> {
           onPressed: () async {},
         ),
       ));
-      // }
+       }
     }
 
     return list;

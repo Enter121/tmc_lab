@@ -7,12 +7,11 @@ import 'package:tmc_lab/services/api_service.dart';
 import 'package:tmc_lab/widgets/timetable_page.dart';
 
 class BusesPage extends StatefulWidget {
-  var busstopId, busstopNr;
   var buses;
-  var info;
+  var station;
   Function()? close;
 
-  BusesPage(this.busstopId, this.busstopNr, this.buses, this.info, this.close);
+  BusesPage(this.buses, this.station, this.close);
 
   @override
   State<StatefulWidget> createState() => _BusesPage();
@@ -27,7 +26,7 @@ class _BusesPage extends State<BusesPage> {
         height: 40,
         child: FutureBuilder(
           future: ApiService.I
-              .getTimetable(widget.busstopId, widget.busstopNr, bus.linia),
+              .getTimetable(widget.station.zespol, widget.station.slupek, bus.linia),
           builder: (BuildContext context, snapshot) {
             if (snapshot.hasError) {
               return Text('${snapshot.error}');
@@ -45,10 +44,10 @@ class _BusesPage extends State<BusesPage> {
                     duration: Duration(milliseconds: 500)),
                 onPressed: () async {
                   List timetables = await ApiService.I.getTimetable(
-                      widget.busstopId, widget.busstopNr, bus.linia);
+                      widget.station.zespol, widget.station.slupek, bus.linia);
                   Navigator.of(context).push(MaterialPageRoute(
                       builder: (context) =>
-                          TimetablePage(widget.info, bus.linia, timetables)));
+                          TimetablePage(widget.station, bus.linia, timetables)));
                 },
               );
             } else {
@@ -99,9 +98,9 @@ class _BusesPage extends State<BusesPage> {
                     alignment: Alignment.centerLeft,
                   ),
                   AutoSizeText(
-                    '${widget.info.nazwa_zespolu.toString().toUpperCase()} ${widget.info.slupek}',
+                    '${widget.station.nazwa_zespolu.toString().toUpperCase()} ${widget.station.slupek}',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                     ),
                   )
@@ -115,7 +114,7 @@ class _BusesPage extends State<BusesPage> {
               width: MediaQuery.of(context).size.width,
               child: SingleChildScrollView(
                   child: _getBuses(
-                      widget.busstopId, widget.busstopNr, widget.buses)),
+                      widget.station.zespol, widget.station.slupek, widget.buses)),
             ),
             flex: 9,
           ),
