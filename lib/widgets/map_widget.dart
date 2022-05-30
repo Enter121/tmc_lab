@@ -4,13 +4,15 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:tmc_lab/models/bus.dart';
 import 'package:tmc_lab/models/station.dart';
 
 class MapWidget extends HookWidget {
   List<dynamic> stations;
+  Bus? bus;
   MapController controller;
   Function(Station station)? select;
-  MapWidget(this.stations, this.controller, this.select);
+  MapWidget(this.stations, this.controller, this.bus, this.select);
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +34,25 @@ class MapWidget extends HookWidget {
       }
       return markers;
     }, [stations.length]);
+
+    var busMarkers = useMemoized(() {
+      if (bus == null) return null;
+      if (bus!.dlug_geo == null || bus!.szer_geo == null) return null;
+      List<Marker> markers = [];
+      markers.add(Marker(
+        width: 30.0,
+        height: 30.0,
+        point: LatLng(bus!.szer_geo!, bus!.dlug_geo!),
+        builder: (ctx) => Container(
+          child: const Icon(
+            Icons.directions_bus,
+            color: Colors.amberAccent,
+          ),
+        ),
+      ));
+      return markers;
+    }, [ValueKey(bus)]);
+
     return FlutterMap(
       mapController: controller,
       options: MapOptions(
@@ -56,6 +77,7 @@ class MapWidget extends HookWidget {
                       .toString() ==
                   marker.point.toString();
             });
+
             if (select != null) select!(value);
             // Navigator.of(context).push(MaterialPageRoute(
             //     builder: (context) =>
@@ -78,6 +100,7 @@ class MapWidget extends HookWidget {
             );
           },
         ),
+        if (busMarkers != null) MarkerLayerOptions(markers: busMarkers),
       ],
     );
   }

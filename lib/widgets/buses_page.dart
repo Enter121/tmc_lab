@@ -10,8 +10,10 @@ class BusesPage extends StatefulWidget {
   var buses;
   var station;
   Function()? close;
+  Function()? back;
+  Function(Bus bus, Timetable timetable)? init;
 
-  BusesPage(this.buses, this.station, this.close);
+  BusesPage(this.buses, this.station, this.close, this.init, this.back);
 
   @override
   State<StatefulWidget> createState() => _BusesPage();
@@ -25,30 +27,53 @@ class _BusesPage extends State<BusesPage> {
         width: MediaQuery.of(context).size.width,
         height: 40,
         child: FutureBuilder(
-          future: ApiService.I
-              .getTimetable(widget.station.zespol, widget.station.slupek, bus.linia),
+          future: ApiService.I.getTimetable(
+              widget.station.zespol, widget.station.slupek, bus.linia),
           builder: (BuildContext context, snapshot) {
             if (snapshot.hasError) {
               return Text('${snapshot.error}');
             } else if (snapshot.hasData) {
-              return TextButton(
-                child: BlinkText(
-                    '${bus.linia} - ${timeToNextBus(bus, snapshot.data)}',
-                    style: TextStyle(
-                      fontSize: 35,
-                      color: timeColor(timeToNextBus(bus, snapshot.data))
-                          ? Colors.red
-                          : Colors.black,
+              Timetable? timetable = nextBus(snapshot.data);
+              String text = getText(timetable);
+              return Flex(
+                direction: Axis.horizontal,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    flex: 10,
+                    child: TextButton(
+                      child: BlinkText('${bus.linia} - ${text}',
+                          style: TextStyle(
+                            fontSize: 35,
+                            color: timeColor(text) ? Colors.red : Colors.black,
+                          ),
+                          endColor: Colors.black,
+                          duration: Duration(milliseconds: 500)),
+                      onPressed: () async {
+                        if (widget.init != null &&
+                            bus != null &&
+                            timetable != null) widget.init!(bus, timetable);
+                      },
                     ),
-                    endColor: Colors.black,
-                    duration: Duration(milliseconds: 500)),
-                onPressed: () async {
-                  List timetables = await ApiService.I.getTimetable(
-                      widget.station.zespol, widget.station.slupek, bus.linia);
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) =>
-                          TimetablePage(widget.station, bus.linia, timetables)));
-                },
+                  ),
+                  Flexible(
+                    flex: 2,
+                    child: TextButton(
+                      child: Icon(Icons.timer_outlined),
+                      onPressed: () async {
+                        // List timetables = await ApiService.I.getTimetable(
+                        //     widget.station.zespol, widget.station.slupek, bus.linia);
+                        List timetables = await ApiService.I.getTimetable(
+                            widget.station.zespol,
+                            widget.station.slupek,
+                            bus.linia);
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => TimetablePage(
+                                widget.station, bus.linia, timetables)));
+                      },
+                    ),
+                  ),
+                ],
               );
             } else {
               return const Material(
@@ -97,11 +122,16 @@ class _BusesPage extends State<BusesPage> {
                     ),
                     alignment: Alignment.centerLeft,
                   ),
-                  AutoSizeText(
-                    '${widget.station.nazwa_zespolu.toString().toUpperCase()} ${widget.station.slupek}',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.white,
+                  TextButton(
+                    onPressed: () {
+                      if (widget.back != null) widget.back!();
+                    },
+                    child: AutoSizeText(
+                      '${widget.station.nazwa_zespolu.toString().toUpperCase()} ${widget.station.slupek}',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.white,
+                      ),
                     ),
                   )
                 ],
@@ -113,8 +143,8 @@ class _BusesPage extends State<BusesPage> {
             child: SizedBox(
               width: MediaQuery.of(context).size.width,
               child: SingleChildScrollView(
-                  child: _getBuses(
-                      widget.station.zespol, widget.station.slupek, widget.buses)),
+                  child: _getBuses(widget.station.zespol, widget.station.slupek,
+                      widget.buses)),
             ),
             flex: 9,
           ),
@@ -124,24 +154,26 @@ class _BusesPage extends State<BusesPage> {
   }
 }
 
-String timeToNextBus(Bus bus, var timetables) {
-  String string = '===';
-
+Timetable? nextBus(var timetables) {
   for (Timetable time in timetables) {
     if (compareTime(time.czas, DateTime.now())) {
-      string = timeCalc(time.czas);
-      break;
+      return time;
     }
   }
-  return string;
+  return null;
+}
+
+String getText(var timetable) {
+  if (timetable == null) return '===';
+  return timeCalc(timetable.czas);
 }
 
 String timeCalc(var time) {
   int min = int.parse(time.toString().substring(3, 5));
   int hour = int.parse(time.toString().substring(0, 2));
-  print('$time');
-  print('hour: ${hour}');
-  print('min: ${min}');
+  // print('$time');
+  // print('hour: ${hour}');
+  // print('min: ${min}');
 
   if ((min - DateTime.now().minute) < 0) {
     min = (60 + min) - DateTime.now().minute;

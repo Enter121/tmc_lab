@@ -54,6 +54,26 @@ class ApiService {
     return stations;
   }
 
+  Future<Bus?> updateLocation(Bus bus, Timetable timetable) async {
+    var response = await invoke(
+        "https://api.um.warszawa.pl/api/action/busestrams_get/?resource_id=%20f2e5503e927d-4ad3-9500-4ab9e55deb59&type=1&line=" +
+            bus.linia +
+            "&brigade=" +
+            timetable.brygada +
+            "&apikey=" +
+            apiKey);
+    final Map<String, dynamic> data = json.decode(response.body);
+    final List<dynamic> tmp = json.decode(jsonEncode(data.values.first));
+
+    for (var value in tmp) {
+      Map<dynamic, dynamic> entry = json.decode(jsonEncode(value));
+      bus.dlug_geo = entry["Lon"];
+      bus.szer_geo = entry["Lat"];
+      return bus;
+    }
+    return null;
+  }
+
   Future<List<Bus>> getBuses(var Id, var Nr) async {
     print("aa " + Id + " " + Nr);
     var response = await invoke(
